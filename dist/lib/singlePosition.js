@@ -24,6 +24,7 @@ class SinglePosition {
         this._openSide = 'buy';
         this._currentOpenPrice = 0;
         this._currentClosePrice = 0;
+        this._closeRate = 1;
         // Information
         this._closeCount = 0;
         this._losscutCount = 0;
@@ -43,6 +44,7 @@ class SinglePosition {
         this._closeOrderSettings = params.closeOrderSettings;
         this._sizeResolution = params.sizeResolution;
         this._priceResolution = params.priceResolution;
+        this._closeRate = params.closeRate || 1;
     }
     roundSize(size) {
         return Math.round(size * (1 / this._sizeResolution)) / (1 / this._sizeResolution);
@@ -215,7 +217,7 @@ class SinglePosition {
             };
             this._closeID = 1;
             try {
-                const res = yield this.placeOrder(this._openSide === 'buy' ? 'sell' : 'buy', 'limit', this._currentSize, price, postOnly);
+                const res = yield this.placeOrder(this._openSide === 'buy' ? 'sell' : 'buy', 'limit', this._currentSize * this._closeRate, price, postOnly);
                 this.setClose(res.data);
                 result.success = true;
                 if (cancelSec > 0) {
@@ -241,7 +243,7 @@ class SinglePosition {
     // }
     updateOrder(order) {
         if (order.order_id === this._openID &&
-            (order.status === 'FULLY_FILLED' || order.status === 'CANCELED_PARTIALLY_FILLED')) {
+            (!['UNFILLED', 'PARTIALLY_FILLED'].includes(order.status))) {
             this.resetOpen();
             const size = this.roundSize(parseFloat(order.start_amount));
             const filled = this.roundSize(parseFloat(order.executed_amount));
@@ -262,7 +264,7 @@ class SinglePosition {
             }
         }
         if (order.order_id === this._closeID &&
-            (order.status === 'FULLY_FILLED' || order.status === 'CANCELED_PARTIALLY_FILLED')) {
+            (!['UNFILLED', 'PARTIALLY_FILLED'].includes(order.status))) {
             this.resetClose();
             const size = this.roundSize(parseFloat(order.start_amount));
             const filled = this.roundSize(parseFloat(order.executed_amount));

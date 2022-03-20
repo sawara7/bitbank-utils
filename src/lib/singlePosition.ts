@@ -17,6 +17,7 @@ export interface SinglePositionParameters {
     api: PrivateApi
     sizeResolution: number
     priceResolution: number
+    closeRate?: number
     minOrderInterval?: number
     openOrderSettings?: OrderSettings
     closeOrderSettings?: OrderSettings
@@ -59,6 +60,7 @@ export class SinglePosition {
     private _currentClosePrice: number = 0
     private _sizeResolution: number
     private _priceResolution: number
+    private _closeRate: number = 1
 
     // Information
     private _closeCount: number = 0
@@ -87,6 +89,7 @@ export class SinglePosition {
         this._closeOrderSettings = params.closeOrderSettings
         this._sizeResolution = params.sizeResolution
         this._priceResolution = params.priceResolution
+        this._closeRate = params.closeRate || 1
     }
 
     private roundSize(size: number): number {
@@ -270,7 +273,7 @@ export class SinglePosition {
             const res = await this.placeOrder(
                 this._openSide === 'buy'? 'sell': 'buy',
                 'limit',
-                this._currentSize,
+                this._currentSize * this._closeRate,
                 price,
                 postOnly)
             this.setClose(res.data)
@@ -299,7 +302,7 @@ export class SinglePosition {
     public updateOrder(order: OrderResponse) {
         if (
             order.order_id === this._openID &&
-            (order.status === 'FULLY_FILLED' || order.status === 'CANCELED_PARTIALLY_FILLED')
+            (!['UNFILLED', 'PARTIALLY_FILLED'].includes(order.status))
             ) {
             this.resetOpen()
             const size = this.roundSize(parseFloat(order.start_amount))
@@ -322,7 +325,7 @@ export class SinglePosition {
         }
         if (
             order.order_id === this._closeID &&
-            (order.status === 'FULLY_FILLED' || order.status === 'CANCELED_PARTIALLY_FILLED')
+            (!['UNFILLED', 'PARTIALLY_FILLED'].includes(order.status))
             ) {
             this.resetClose()
             const size = this.roundSize(parseFloat(order.start_amount))

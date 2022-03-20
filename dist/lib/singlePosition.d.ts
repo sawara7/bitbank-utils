@@ -6,6 +6,7 @@ export interface SinglePositionParameters {
     api: PrivateApi;
     sizeResolution: number;
     priceResolution: number;
+    closeRate?: number;
     minOrderInterval?: number;
     openOrderSettings?: OrderSettings;
     closeOrderSettings?: OrderSettings;
@@ -42,6 +43,7 @@ export declare class SinglePosition {
     private _currentClosePrice;
     private _sizeResolution;
     private _priceResolution;
+    private _closeRate;
     private _closeCount;
     private _losscutCount;
     private _cumulativeFee;

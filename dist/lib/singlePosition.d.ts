@@ -71,6 +71,7 @@ export declare class SinglePosition {
     get profit(): number;
     get enabledOpen(): Boolean;
     get enabledClose(): Boolean;
+    get activeOrderID(): number;
     get openOrderSettings(): OrderSettings | undefined;
     get closeOrderSettings(): OrderSettings | undefined;
     get currentSize(): number;

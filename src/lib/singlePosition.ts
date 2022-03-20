@@ -414,6 +414,17 @@ export class SinglePosition {
                 this._currentSize > 0
     }
 
+    get activeOrderID(): number {
+        let res = -1
+        if (this._openID !== 0 && this._closeID === 0) {
+            res = this._openID
+        }
+        if (this._openID === 0 && this._closeID !== 0 && this._currentSize > 0) {
+            res = this._closeID
+        }
+        return res
+    }
+
     get openOrderSettings(): OrderSettings | undefined {
         return this._openOrderSettings
     }

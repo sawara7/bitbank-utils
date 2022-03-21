@@ -179,6 +179,7 @@ export class SinglePosition {
         if (!this._closeOrderSettings) {
             return {success: false, message:'No close order settings.'}
         }
+        this._currentSize = this.roundSize(this._currentSize * this._closeRate)
         if (this._closeOrderSettings.type === 'limit') {
             return await this.closeLimit(
                 this._closeOrderSettings.price,
@@ -273,7 +274,7 @@ export class SinglePosition {
             const res = await this.placeOrder(
                 this._openSide === 'buy'? 'sell': 'buy',
                 'limit',
-                this._currentSize * this._closeRate,
+                this._currentSize,
                 price,
                 postOnly)
             this.setClose(res.data)

@@ -301,13 +301,13 @@ export class SinglePosition {
     // }
 
     public updateOrder(order: OrderResponse) {
-        if (
-            order.order_id === this._openID &&
-            (!['UNFILLED', 'PARTIALLY_FILLED'].includes(order.status))
-            ) {
+        if (['UNFILLED', 'PARTIALLY_FILLED'].includes(order.status)) {
+            return
+        }
+        const size = this.roundSize(parseFloat(order.start_amount))
+        const filled = this.roundSize(parseFloat(order.executed_amount))
+        if (order.order_id === this._openID) {
             this.resetOpen()
-            const size = this.roundSize(parseFloat(order.start_amount))
-            const filled = this.roundSize(parseFloat(order.executed_amount))
             if (filled > 0) {
                 this._currentSize += filled
                 this._initialSize += filled
@@ -324,13 +324,8 @@ export class SinglePosition {
                 }
             }
         }
-        if (
-            order.order_id === this._closeID &&
-            (!['UNFILLED', 'PARTIALLY_FILLED'].includes(order.status))
-            ) {
+        if (order.order_id === this._closeID) {
             this.resetClose()
-            const size = this.roundSize(parseFloat(order.start_amount))
-            const filled = this.roundSize(parseFloat(order.executed_amount))
             if (filled > 0) {
                 this._currentSize -= filled
                 this._currentClosePrice = parseFloat(order.average_price)
@@ -340,11 +335,9 @@ export class SinglePosition {
                     this.onCloseOrderCanceled(this)
                 }
             }
-
             if (this._isLosscut && this._currentSize > 0) {
                 this.closeMarket()
             }
-
             if (filled === size) {
                 if (this._isLosscut) {
                     this._losscutCount++

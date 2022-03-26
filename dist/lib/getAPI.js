@@ -15,7 +15,7 @@ const node_bitbankcc_1 = require("node-bitbankcc");
 const PRIVATE_ENDPOINT = 'https://api.bitbank.cc/v1';
 const PUBLIC_ENDPOINT = 'https://public.bitbank.cc';
 const PATH = 'settings/bitbank/';
-function getBitBankPrivateAPI() {
+function getBitBankPrivateAPI(debug = false) {
     return __awaiter(this, void 0, void 0, function* () {
         const rdb = yield (0, my_utils_1.getRealTimeDatabase)();
         const apiKey = yield rdb.get(yield rdb.getReference(PATH + 'apiKey'));
@@ -26,6 +26,17 @@ function getBitBankPrivateAPI() {
             // timeout?: number,
             apiKey: apiKey,
             apiSecret: secret
+        }, {
+            optionsCallback: (options) => {
+                if (debug && options) {
+                    console.log(options['method'], options['baseURL'], options['url']);
+                }
+            },
+            responseCallback: (response) => {
+                if (debug && response) {
+                    // console.log(response)
+                }
+            }
         });
     });
 }
